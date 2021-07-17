@@ -1,0 +1,163 @@
+{
+  "key": "segmentfault",
+  "name": "SegmentFault",
+  "type": "开发者",
+  "url": "https://segmentfault.com",
+  "logoUrl": "",
+  "puppeteerScripts": {
+    "processor": [
+      "replaceImages"
+    ],
+    "version": "1.0.0",
+    "login": [
+      {
+        "key": "evalAuthPassKey",
+        "val": "!!document.evaluate(`(//a[@href='/user/login'])[2]`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue"
+      }
+    ],
+    "configSchema": {
+      "type": "object",
+      "displayType": "row",
+      "showDescIcon": true,
+      "column": 1,
+      "properties": {
+        "mode": {
+          "title": "文章编辑器",
+          "default": "md",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [
+            "md",
+            "rich"
+          ],
+          "enumNames": [
+            "Markdown",
+            "富文本"
+          ],
+          "type": "string",
+          "widget": "select"
+        },
+        "debug": {
+          "title": "是否显示发布流程",
+          "description": "勾选则显示发布流程",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "checkbox"
+        }
+      }
+    },
+    "configProcessing": [
+      {
+        "key": "publishUrl",
+        "val": "https://segmentfault.com/write?freshman=1"
+      },
+      {
+        "key": "publishConfig",
+        "val": "function test() {\n        const resp = eval({classify: [...document.querySelectorAll('.category-list>div')].reduce((acc, o) => { return { ...acc, [o.innerText]: o.innerText }}, {}),})\n        const groupsEnum = Object.keys(resp.classify).map((o) => o);\n        const classify = {};\n        classify.enum = groupsEnum;\n        classify.enumNames = Object.values(resp.classify);\n        classify.default = groupsEnum[0];\n        return { classify: classify }\n      }\n  \n      test()"
+      }
+    ],
+    "draft": [
+      {
+        "name": "跳转页面",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://juejin.cn/editor/drafts/new?v=2"
+            }
+          }
+        ]
+      },
+      {
+        "name": "检测当前是否markdown编辑器",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//input[@class='title-input title-input']"
+            }
+          },
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                ".header > .header-content > .editor-switcher > .toggle-btn > .ion-ios-more",
+                ".rich-text-editor > .header > .header-content > .editor-switcher > .panel",
+                ".editor-switcher > .confirm-dialog-box > .confirm-dialog > .dialog-footer > .confirm-btn"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "发布内容",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "#juejin-web-editor > .edit-draft > .markdown-editor > .header > .title-input",
+                  "val": "{{this.body.title}}"
+                },
+                {
+                  "key": ".bytemd > .bytemd-body > .bytemd-editor > .CodeMirror > .CodeMirror-scroll",
+                  "val": "{{this.body.content}}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "添加标签",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()=\" 发布 \"]",
+                "//div[text()[normalize-space()='请搜索添加标签']]",
+                "//li[text()[normalize-space()='{{this.body.label}}']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择分类",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//div[text()=\"{{this.body.classify}}\"]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "上传封面",
+        "runs": [
+          {
+            "fn": "uploadPic",
+            "props": {
+              "selectId": ".publish-popup > input[type=file]",
+              "url": "{{this.body.coverUrl}}",
+              "picId": ".preview-image[src^=\"https\"]"
+            }
+          }
+        ]
+      }
+    ],
+    "draftRich": [],
+    "cleanDraft": []
+  }
+}

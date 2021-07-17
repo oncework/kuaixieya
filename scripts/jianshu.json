@@ -1,0 +1,148 @@
+{
+  "key": "jianshu",
+  "name": "简书",
+  "type": "通用类",
+  "url": "https://www.jianshu.com/sign_in",
+  "logoUrl": "",
+  "puppeteerScripts": {
+    "processor": [],
+    "version": "1.0.0",
+    "login": [
+      {
+        "key": "cookieAuthPassKey",
+        "val": "remember_user_token"
+      }
+    ],
+    "configSchema": {
+      "type": "object",
+      "displayType": "row",
+      "showDescIcon": true,
+      "column": 1,
+      "properties": {
+        "mode": {
+          "title": "文章编辑器",
+          "default": "md",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [
+            "md",
+            "rich"
+          ],
+          "enumNames": [
+            "Markdown",
+            "富文本"
+          ],
+          "type": "string",
+          "widget": "select"
+        },
+        "classify": {
+          "title": "文集",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [],
+          "enumNames": [],
+          "type": "string",
+          "widget": "select"
+        },
+        "debug": {
+          "title": "是否显示发布流程",
+          "description": "勾选则显示发布流程",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "checkbox"
+        }
+      }
+    },
+    "configProcessing": [
+      {
+        "key": "publishUrl",
+        "val": "https://www.jianshu.com/writer#/"
+      },
+      {
+        "key": "publishConfig",
+        "val": "function test() {\n        const resp = eval({\n          classify: [...document.querySelectorAll('div.ant-col>ul>li')].reduce((acc, o) => { return { ...acc, [o.innerText]: o.innerText }}, {}),\n        });\n        const groupsEnum = Object.keys(resp.classify).map((o) => o);\n        const classify = {};\n        classify.enum = groupsEnum;\n        classify.enumNames = Object.values(resp.classify);\n        classify.default = groupsEnum[0];\n        return { classify: classify }\n      }\n  \n      test()"
+      }
+    ],
+    "draft": [
+      {
+        "name": "跳转页面",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://www.jianshu.com/writer#/"
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择文集",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//span[text()='{{this.body.classify}}']"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "等待",
+        "runs": [
+          {
+            "fn": "wait",
+            "props": {
+              "time": 500
+            }
+          },
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//i[@class='fa fa-plus-circle']"
+              ]
+            }
+          },
+          {
+            "fn": "wait",
+            "props": {
+              "time": 500
+            }
+          }
+        ]
+      },
+      {
+        "name": "发布内容",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "input[type='text'][value]",
+                  "val": "{{this.body.title}}"
+                },
+                {
+                  "key": "#arthur-editor",
+                  "val": "{{this.body.content}}"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "draftRich": [],
+    "cleanDraft": []
+  }
+}

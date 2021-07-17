@@ -1,0 +1,212 @@
+{
+  "key": "oschina",
+  "name": "开源中国",
+  "type": "开发者",
+  "url": "https://my.oschina.net/",
+  "logoUrl": "",
+  "puppeteerScripts": {
+    "processor": [
+      "replaceImages"
+    ],
+    "version": "1.0.0",
+    "login": [
+      {
+        "key": "evalObjAfterAuthPass",
+        "val": "g_user_code"
+      }
+    ],
+    "configSchema": {
+      "type": "object",
+      "displayType": "row",
+      "showDescIcon": true,
+      "properties": {
+        "mode": {
+          "title": "文章编辑器",
+          "default": "md",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [
+            "md",
+            "rich"
+          ],
+          "enumNames": [
+            "Markdown",
+            "富文本"
+          ],
+          "type": "string",
+          "widget": "select"
+        },
+        "groups": {
+          "title": "技术领域",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [],
+          "enumNames": [],
+          "type": "number",
+          "widget": "select"
+        },
+        "catalog": {
+          "title": "文章分类",
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [],
+          "enumNames": [],
+          "type": "number",
+          "widget": "select"
+        },
+        "deny_comment": {
+          "title": "禁止评论",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
+        },
+        "as_top": {
+          "title": "置顶",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
+        },
+        "privacy": {
+          "title": "仅自己可见",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
+        },
+        "downloadImg": {
+          "title": "下载外站图片到本地",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
+        },
+        "type": {
+          "title": "原创",
+          "default": true,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
+        },
+        "origin_url": {
+          "title": "原文链接",
+          "required": true,
+          "bind": "",
+          "disabled": false,
+          "readOnly": false,
+          "hidden": "{{formData.type !== true}}",
+          "props": {
+            "allowClear": false
+          },
+          "pattern": "",
+          "type": "string"
+        },
+        "debug": {
+          "title": "是否显示发布流程",
+          "description": "勾选则显示发布流程",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "checkbox"
+        }
+      }
+    },
+    "configProcessing": [
+      {
+        "key": "evalAfterAuthPass",
+        "val": "[...document.querySelectorAll('val')].reduce((acc, o) => { return { ...acc, [o.getAttribute('data-name')]: o.getAttribute('data-value') }}, {})"
+      },
+      {
+        "key": "publishUrl",
+        "val": "https://my.oschina.net/u/{{this.doc.extra.g_user_id}}/blog/write"
+      },
+      {
+        "key": "publishConfig",
+        "val": "function test() {\n        const resp = eval({\n          groups: [...document.querySelectorAll('.groups>.menu>.item')].reduce((acc, o) => { return { ...acc, [o.getAttribute('data-value')]: o.innerText }}, {}),\n          catalogs: [...document.querySelectorAll('#catalogDropdown>option')].reduce((acc, o) => { return { ...acc, [o.getAttribute('value')]: o.innerText }}, {}),\n        });\n        // groups\n        const groupsEnum = Object.keys(resp.groups).map((o) => Number(o));\n        const groups = {};\n        groups.enum = groupsEnum;\n        groups.enumNames = Object.values(resp.groups);\n        groups.default = groupsEnum[0];\n        // catalogs\n        const catalogs = {};\n        catalogs.enum = Object.keys(resp.catalogs).map((o) => Number(o));;\n        catalogs.enumNames = Object.values(resp.catalogs);\n        return { catalog: catalogs, groups: groups }\n      }\n  \n      test()"
+      }
+    ],
+    "draft": [
+      {
+        "name": "跳转页面",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://my.oschina.net/u/{{this.doc.extra.g_user_id}}/blog/write"
+            }
+          }
+        ]
+      },
+      {
+        "name": "切换md编辑器",
+        "runs": [
+          {
+            "fn": "wait",
+            "props": {
+              "time": 1000
+            }
+          },
+          [
+            "wait",
+            1000
+          ],
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//a[text()[normalize-space()='Markdown']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "发布内容",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "input[name=\"title\"]",
+                  "val": "{{this.body.title}}"
+                },
+                {
+                  "key": ".CodeMirror",
+                  "val": "{{this.body.content}}"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "draftRich": [],
+    "cleanDraft": []
+  }
+}
