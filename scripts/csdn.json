@@ -94,7 +94,9 @@
         ]
       }
     ],
+    "publish": [],
     "draftRich": [],
+    "publishRich": [],
     "cleanDraft": []
   }
 }

@@ -206,7 +206,9 @@
         ]
       }
     ],
+    "publish": [],
     "draftRich": [],
+    "publishRich": [],
     "cleanDraft": []
   }
 }

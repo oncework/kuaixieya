@@ -61,6 +61,7 @@
       }
     ],
     "draft": [],
+    "publish": [],
     "draftRich": [
       {
         "name": "跳转页面",
@@ -94,6 +95,7 @@
         ]
       }
     ],
+    "publishRich": [],
     "cleanDraft": []
   }
 }

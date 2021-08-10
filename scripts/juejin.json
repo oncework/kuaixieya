@@ -210,46 +210,54 @@
         ]
       }
     ],
+    "publish": [],
     "draftRich": [],
+    "publishRich": [],
     "cleanDraft": [
       {
         "name": "跳转草稿地址",
         "runs": [
-          [
-            "gotoUrl",
-            "https://juejin.cn/editor/drafts"
-          ]
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://juejin.cn/editor/drafts"
+            }
+          }
         ]
       },
       {
         "name": "查看是否有更多草稿",
         "runs": [
-          [
-            "has",
-            "//li[1]/div[@class='draft' and 1]/div[@class='info-box' and 1]/div[@class='menu ion-ios-more' and 2]",
-            "stop"
-          ]
+          {
+            "fn": "has",
+            "props": {
+              "id": "//li[1]/div[@class='draft' and 1]/div[@class='info-box' and 1]/div[@class='menu ion-ios-more' and 2]",
+              "type": "stop"
+            }
+          }
         ]
       },
       {
         "name": "删除草稿",
         "runs": [
-          [
-            "clicks",
-            [
-              ".list > .item:nth-child(1) > .draft > .info-box > .menu",
-              ".item:nth-child(1) > .draft > .info-box > .menu > .menu-list > .item:nth-child(2)",
-              ".draft > .confirm-dialog-box > .confirm-dialog > .dialog-footer > .confirm-btn"
-            ]
-          ]
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                ".list > .item:nth-child(1) > .draft > .info-box > .menu",
+                ".item:nth-child(1) > .draft > .info-box > .menu > .menu-list > .item:nth-child(2)",
+                ".draft > .confirm-dialog-box > .confirm-dialog > .dialog-footer > .confirm-btn"
+              ]
+            }
+          }
         ]
       },
       {
         "name": "继续循环删除",
         "runs": [
-          [
-            "cleanDraft"
-          ]
+          {
+            "fn": "cleanDraft"
+          }
         ]
       }
     ]
