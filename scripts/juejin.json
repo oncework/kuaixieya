@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.0",
+    "version": "1.0.11",
     "login": [
       {
         "name": "登录后校验认证",
@@ -210,7 +210,21 @@
         ]
       }
     ],
-    "publish": [],
+    "publish": [
+      {
+        "name": "确认发布",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()[normalize-space()='确定并发布']]"
+              ]
+            }
+          }
+        ]
+      }
+    ],
     "draftRich": [],
     "publishRich": [],
     "cleanDraft": [
@@ -257,6 +271,19 @@
         "runs": [
           {
             "fn": "cleanDraft"
+          }
+        ]
+      }
+    ],
+    "openDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://juejin.cn/editor/drafts"
+            }
           }
         ]
       }

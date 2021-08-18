@@ -8,7 +8,7 @@
     "processor": [
       "replaceImages"
     ],
-    "version": "1.0.0",
+    "version": "1.0.11",
     "login": [
       {
         "key": "evalObjAfterAuthPass",
@@ -209,6 +209,7 @@
     "publish": [],
     "draftRich": [],
     "publishRich": [],
-    "cleanDraft": []
+    "cleanDraft": [],
+    "openDraft": []
   }
 }
