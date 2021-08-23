@@ -38,7 +38,7 @@
           "widget": "select"
         },
         "debug": {
-          "title": "是否显示发布流程",
+          "title": "是否打开渠道窗口",
           "description": "勾选则显示发布流程",
           "default": false,
           "required": false,

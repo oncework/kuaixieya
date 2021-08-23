@@ -40,7 +40,7 @@
           "widget": "select"
         },
         "debug": {
-          "title": "是否显示发布流程",
+          "title": "是否打开渠道窗口",
           "description": "勾选则显示发布流程",
           "default": false,
           "required": false,
@@ -80,17 +80,25 @@
           {
             "fn": "has",
             "props": {
-              "id": "//button[text()[normalize-space()='编辑器: markdown']]"
-            }
-          },
-          {
-            "fn": "clicks",
-            "props": {
-              "ids": [
-                "button#editor-switcher",
-                "//button[text()[normalize-space()='markdown']]"
-              ]
-            }
+              "id": "//button[text()[normalize-space()='编辑器: Markdown']]"
+            },
+            "yes": [],
+            "no": [
+              {
+                "name": "切换markdown编辑器",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "button#editor-switcher",
+                        "//button[text()[normalize-space()='Markdown']]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -124,12 +132,101 @@
             }
           }
         ]
+      },
+      {
+        "name": "存为草稿",
+        "only": true,
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()[normalize-space()='存为草稿']]"
+              ]
+            }
+          }
+        ]
       }
     ],
-    "publish": [],
+    "publish": [
+      {
+        "name": "发布",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()[normalize-space()='发布']]"
+              ]
+            }
+          }
+        ]
+      }
+    ],
     "draftRich": [],
     "publishRich": [],
-    "cleanDraft": [],
-    "openDraft": []
+    "cleanDraft": [
+      {
+        "name": "跳转草稿页",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://i.cnblogs.com/posts?cfg=512"
+            }
+          }
+        ]
+      },
+      {
+        "name": "查看是否有更多草稿",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//cnb-layout/div[2]/div[3]/div[2]/div/cnb-spinner/div/cnb-post-main/cnb-post-list/div[1]/table/tbody/tr[1]",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "删除草稿",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "//a[text()[normalize-space()='删除']]",
+                        "//button[text()[normalize-space()='确定']]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "继续循环删除",
+        "runs": [
+          {
+            "fn": "cleanDraft"
+          }
+        ]
+      }
+    ],
+    "openDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://i.cnblogs.com/posts?cfg=512"
+            }
+          }
+        ]
+      }
+    ]
   }
 }

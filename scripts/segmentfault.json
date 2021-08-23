@@ -40,7 +40,7 @@
           "widget": "select"
         },
         "debug": {
-          "title": "是否显示发布流程",
+          "title": "是否打开渠道窗口",
           "description": "勾选则显示发布流程",
           "default": false,
           "required": false,
@@ -81,17 +81,25 @@
             "fn": "has",
             "props": {
               "id": "//input[@class='title-input title-input']"
-            }
-          },
-          {
-            "fn": "clicks",
-            "props": {
-              "ids": [
-                ".header > .header-content > .editor-switcher > .toggle-btn > .ion-ios-more",
-                ".rich-text-editor > .header > .header-content > .editor-switcher > .panel",
-                ".editor-switcher > .confirm-dialog-box > .confirm-dialog > .dialog-footer > .confirm-btn"
-              ]
-            }
+            },
+            "yes": [
+              {
+                "name": "切换markdown编辑器",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        ".header > .header-content > .editor-switcher > .toggle-btn > .ion-ios-more",
+                        ".rich-text-editor > .header > .header-content > .editor-switcher > .panel",
+                        ".editor-switcher > .confirm-dialog-box > .confirm-dialog > .dialog-footer > .confirm-btn"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
           }
         ]
       },
