@@ -38,27 +38,67 @@
           "type": "string",
           "widget": "select"
         },
-        "groups": {
-          "title": "技术领域",
+        "source": {
+          "title": "文章来源",
+          "default": "原创",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [
+            "原创",
+            "转载"
+          ],
+          "enumNames": [
+            "原创",
+            "转载"
+          ],
+          "type": "string",
+          "widget": "radio"
+        },
+        "origin_url": {
+          "title": "原文链接",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": "{{formData.source === '原创'}}",
+          "props": {
+            "allowClear": false
+          },
+          "pattern": "",
+          "type": "string"
+        },
+        "catalog": {
+          "title": "文章专辑",
           "required": true,
           "disabled": false,
           "readOnly": false,
           "hidden": false,
           "enum": [],
           "enumNames": [],
-          "type": "number",
+          "type": "string",
           "widget": "select"
         },
-        "catalog": {
-          "title": "文章分类",
+        "groups": {
+          "title": "推广专区",
           "required": false,
           "disabled": false,
           "readOnly": false,
           "hidden": false,
           "enum": [],
           "enumNames": [],
-          "type": "number",
+          "type": "string",
           "widget": "select"
+        },
+        "privacy": {
+          "title": "仅自己可见",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
         },
         "deny_comment": {
           "title": "禁止评论",
@@ -80,16 +120,6 @@
           "type": "boolean",
           "widget": "switch"
         },
-        "privacy": {
-          "title": "仅自己可见",
-          "default": false,
-          "required": false,
-          "disabled": false,
-          "readOnly": false,
-          "hidden": false,
-          "type": "boolean",
-          "widget": "switch"
-        },
         "downloadImg": {
           "title": "下载外站图片到本地",
           "default": false,
@@ -99,29 +129,6 @@
           "hidden": false,
           "type": "boolean",
           "widget": "switch"
-        },
-        "type": {
-          "title": "原创",
-          "default": true,
-          "required": false,
-          "disabled": false,
-          "readOnly": false,
-          "hidden": false,
-          "type": "boolean",
-          "widget": "switch"
-        },
-        "origin_url": {
-          "title": "原文链接",
-          "required": true,
-          "bind": "",
-          "disabled": false,
-          "readOnly": false,
-          "hidden": "{{formData.type !== true}}",
-          "props": {
-            "allowClear": false
-          },
-          "pattern": "",
-          "type": "string"
         },
         "debug": {
           "title": "是否打开渠道窗口",
@@ -147,7 +154,7 @@
       },
       {
         "key": "publishConfig",
-        "val": "function test() {\n        const resp = eval({\n          groups: [...document.querySelectorAll('.groups>.menu>.item')].reduce((acc, o) => { return { ...acc, [o.getAttribute('data-value')]: o.innerText }}, {}),\n          catalogs: [...document.querySelectorAll('#catalogDropdown>option')].reduce((acc, o) => { return { ...acc, [o.getAttribute('value')]: o.innerText }}, {}),\n        });\n        // groups\n        const groupsEnum = Object.keys(resp.groups).map((o) => Number(o));\n        const groups = {};\n        groups.enum = groupsEnum;\n        groups.enumNames = Object.values(resp.groups);\n        groups.default = groupsEnum[0];\n        // catalogs\n        const catalogs = {};\n        catalogs.enum = Object.keys(resp.catalogs).map((o) => Number(o));;\n        catalogs.enumNames = Object.values(resp.catalogs);\n        return { catalog: catalogs, groups: groups }\n      }\n  \n      test()"
+        "val": "\n    function initFrom() {\n  const resp = eval({\n    groups: [...document.querySelectorAll('.groups>.menu>.item')].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n    catalogs: [...document.querySelectorAll('#catalogDropdown>option')].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n  });\n  // groups\n  const groupsEnum = Object.keys(resp.groups).map((o) => o);\n  const groups = {};\n  groups.enum = groupsEnum;\n  groups.enumNames = Object.values(resp.groups);\n  groups.default = groupsEnum[0];\n  // catalogs\n  const catalogs = {};\n  catalogs.enum = Object.keys(resp.catalogs).map((o) => o);\n  catalogs.enumNames = Object.values(resp.catalogs);\n  return { catalog: catalogs, groups: groups };\n}\n    initFrom()\n    "
       }
     ],
     "draft": [
@@ -204,12 +211,216 @@
             }
           }
         ]
+      },
+      {
+        "name": "打开发布配置",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//div[text()[normalize-space()='发布文章']]",
+                "//div[text()[normalize-space()='权限设置']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "文章来源",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='{{this.body.source}}']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "文章来源",
+        "when": "'{{this.body.source}}' === '转载'",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "input[name=\"origin_url\"]",
+                  "val": "{{this.body.origin_url}}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择文章专辑",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                ".catalog-select",
+                "//div[contains(@class,'catalog-select')]/div/div[text()[normalize-space()='{{this.body.catalog}}']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择推广专区",
+        "when": "'{{this.body.groups}}'",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                ".groups",
+                "//div[contains(@class,'groups')]/div/div[text()[normalize-space()='{{this.body.groups}}']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择仅自己可见",
+        "when": "Boolean('{{this.body.privacy}}')",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='仅自己可见']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择禁止评论",
+        "when": "Boolean('{{this.body.deny_comment}}')",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='禁止评论']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择置顶",
+        "when": "Boolean('{{this.body.as_top}}')",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='置顶']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择下载外站图片到本地",
+        "when": "Boolean('{{this.body.downloadImg}}')",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='下载外站图片到本地']]"
+              ]
+            }
+          }
+        ]
       }
     ],
-    "publish": [],
+    "publish": [
+      {
+        "name": "确认并发布",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//div[text()[normalize-space()='确认并发布']]"
+              ]
+            }
+          }
+        ]
+      }
+    ],
     "draftRich": [],
     "publishRich": [],
-    "cleanDraft": [],
-    "openDraft": []
+    "cleanDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://my.oschina.net/u/{{this.doc.extra.g_user_id}}/admin/drafts"
+            }
+          }
+        ]
+      },
+      {
+        "name": "查看是否有更多草稿",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//a[text()[normalize-space()='删除']]",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "删除草稿",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "//a[text()[normalize-space()='删除']]",
+                        "//div[text()[normalize-space()='确定']]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "继续循环删除",
+        "runs": [
+          {
+            "fn": "cleanDraft"
+          }
+        ]
+      }
+    ],
+    "openDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://my.oschina.net/u/{{this.doc.extra.g_user_id}}/admin/drafts"
+            }
+          }
+        ]
+      }
+    ]
   }
 }

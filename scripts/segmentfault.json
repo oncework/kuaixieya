@@ -39,6 +39,106 @@
           "type": "string",
           "widget": "select"
         },
+        "tags": {
+          "title": "添加标签",
+          "description": "最多可选5个标签",
+          "required": true,
+          "min": 1,
+          "max": 5,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [],
+          "enumNames": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "widget": "multiSelect"
+        },
+        "coverUrl": {
+          "title": "设置封面",
+          "description": "封面图比例 21:9, 推荐分辨率 790*338@2x",
+          "type": "string",
+          "widget": "LocalPicPreview"
+        },
+        "type": {
+          "title": "文章类型",
+          "default": "原创",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [
+            "原创",
+            "转载",
+            "翻译"
+          ],
+          "enumNames": [
+            "原创",
+            "转载",
+            "翻译"
+          ],
+          "type": "string",
+          "widget": "radio"
+        },
+        "origin_url": {
+          "title": "原文链接",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": "{{formData.type === '原创'}}",
+          "props": {
+            "allowClear": false
+          },
+          "pattern": "",
+          "type": "string"
+        },
+        "catalog": {
+          "title": "发布到",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [],
+          "enumNames": [],
+          "type": "string",
+          "widget": "select"
+        },
+        "time": {
+          "title": "定时发布",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
+        },
+        "date": {
+          "title": "发布时间",
+          "description": "例如 2015-11-11 20:30",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": "{{formData.time !== true}}",
+          "props": {
+            "allowClear": false
+          },
+          "pattern": "",
+          "type": "string"
+        },
+        "copyright": {
+          "title": "注明版权",
+          "description": "文章页面将提示版权所有",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "switch"
+        },
         "debug": {
           "title": "是否打开渠道窗口",
           "description": "勾选则显示发布流程",
@@ -59,7 +159,7 @@
       },
       {
         "key": "publishConfig",
-        "val": "function test() {\n        const resp = eval({classify: [...document.querySelectorAll('.category-list>div')].reduce((acc, o) => { return { ...acc, [o.innerText]: o.innerText }}, {}),})\n        const groupsEnum = Object.keys(resp.classify).map((o) => o);\n        const classify = {};\n        classify.enum = groupsEnum;\n        classify.enumNames = Object.values(resp.classify);\n        classify.default = groupsEnum[0];\n        return { classify: classify }\n      }\n  \n      test()"
+        "val": "\n    async function initFrom() {\n  // 初始化标签\n  document\n    .evaluate(\n      '//button[text()=\"+ 添加标签\"]',\n      document,\n      null,\n      XPathResult.FIRST_ORDERED_NODE_TYPE,\n      null\n    )\n    .singleNodeValue.click();\n  // 打开发布文章\n  document\n    .evaluate(\n      '//button[text()=\"发布文章\"]',\n      document,\n      null,\n      XPathResult.FIRST_ORDERED_NODE_TYPE,\n      null\n    )\n    .singleNodeValue.click();\n  // 等待打开\n  await new Promise((res) => {\n    setTimeout(() => {\n      res();\n    }, 500);\n  });\n  // 加载配置\n  const resp = eval({\n    tags: [...document.querySelectorAll('.tab-content > div > a')].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n    catalogs: [...document.querySelectorAll('.custom-select>option')].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n  });\n  // 获取发布到\n  const catalogs = {};\n  catalogs.enum = Object.keys(resp.catalogs).map((o) => o);\n  catalogs.enumNames = Object.values(resp.catalogs);\n  catalogs.default = catalogs.enumNames[0];\n  // 获取标签\n  const tags = {};\n  tags.enum = Object.keys(resp.tags).map((o) => o);\n  tags.enumNames = Object.values(resp.tags);\n\n  return { catalog: catalogs, tags };\n}\n    initFrom()\n    "
       }
     ],
     "draft": [
@@ -69,37 +169,8 @@
           {
             "fn": "gotoUrl",
             "props": {
-              "url": "https://juejin.cn/editor/drafts/new?v=2"
+              "url": "https://segmentfault.com/write"
             }
-          }
-        ]
-      },
-      {
-        "name": "检测当前是否markdown编辑器",
-        "runs": [
-          {
-            "fn": "has",
-            "props": {
-              "id": "//input[@class='title-input title-input']"
-            },
-            "yes": [
-              {
-                "name": "切换markdown编辑器",
-                "runs": [
-                  {
-                    "fn": "clicks",
-                    "props": {
-                      "ids": [
-                        ".header > .header-content > .editor-switcher > .toggle-btn > .ion-ios-more",
-                        ".rich-text-editor > .header > .header-content > .editor-switcher > .panel",
-                        ".editor-switcher > .confirm-dialog-box > .confirm-dialog > .dialog-footer > .confirm-btn"
-                      ]
-                    }
-                  }
-                ]
-              }
-            ],
-            "no": []
           }
         ]
       },
@@ -111,11 +182,11 @@
             "props": {
               "groups": [
                 {
-                  "key": "#juejin-web-editor > .edit-draft > .markdown-editor > .header > .title-input",
+                  "key": "input[name=\"title\"]",
                   "val": "{{this.body.title}}"
                 },
                 {
-                  "key": ".bytemd > .bytemd-body > .bytemd-editor > .CodeMirror > .CodeMirror-scroll",
+                  "key": ".CodeMirror-lines",
                   "val": "{{this.body.content}}"
                 }
               ]
@@ -124,28 +195,13 @@
         ]
       },
       {
-        "name": "添加标签",
+        "name": "打开发布文章",
         "runs": [
           {
             "fn": "clicks",
             "props": {
               "ids": [
-                "//button[text()=\" 发布 \"]",
-                "//div[text()[normalize-space()='请搜索添加标签']]",
-                "//li[text()[normalize-space()='{{this.body.label}}']]"
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "name": "选择分类",
-        "runs": [
-          {
-            "fn": "clicks",
-            "props": {
-              "ids": [
-                "//div[text()=\"{{this.body.classify}}\"]"
+                "//button[text()=\"发布文章\"]"
               ]
             }
           }
@@ -153,22 +209,191 @@
       },
       {
         "name": "上传封面",
+        "when": "'{{this.body.coverUrl}}'",
         "runs": [
           {
             "fn": "uploadPic",
             "props": {
-              "selectId": ".publish-popup > input[type=file]",
+              "selectId": ".cover-set>input[type=file]",
               "url": "{{this.body.coverUrl}}",
-              "picId": ".preview-image[src^=\"https\"]"
+              "picId": ".cover[src^=\"https\"]"
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择文章类型",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='{{this.body.type}}']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择文章来源",
+        "when": "'{{this.body.type}}' !== '原创'",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "input[placeholder=\"请输入原文地址\"]",
+                  "val": "{{this.body.origin_url}}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择发布到",
+        "runs": [
+          {
+            "fn": "select",
+            "props": {
+              "id": ".custom-select",
+              "value": "{{this.body.catalog}}"
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择定时发布",
+        "when": "Boolean('{{this.body.time}}')",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='定时发布']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择定时发布时间",
+        "when": "'{{this.body.date}}'",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "input[placeholder=\"例如 2015-11-11 20:30\"]",
+                  "val": "{{this.body.date}}"
+                }
+              ]
+            }
+          },
+          {
+            "fn": "keypress",
+            "props": {
+              "key": "Tab"
+            }
+          }
+        ]
+      },
+      {
+        "name": "选择注明版权",
+        "when": "Boolean('{{this.body.copyright}}')",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[text()[normalize-space()='注明版权']]"
+              ]
             }
           }
         ]
       }
     ],
-    "publish": [],
+    "publish": [
+      {
+        "name": "确认发布",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()[normalize-space()='确认发布']]"
+              ]
+            }
+          }
+        ]
+      }
+    ],
     "draftRich": [],
     "publishRich": [],
-    "cleanDraft": [],
-    "openDraft": []
+    "cleanDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://segmentfault.com/user/draft"
+            }
+          }
+        ]
+      },
+      {
+        "name": "查看是否有更多草稿",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//a[text()[normalize-space()='舍弃']]",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "删除草稿",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "//a[text()[normalize-space()='舍弃']]",
+                        "//button[text()[normalize-space()='舍弃']]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "继续循环删除",
+        "runs": [
+          {
+            "fn": "cleanDraft"
+          }
+        ]
+      }
+    ],
+    "openDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://segmentfault.com/user/draft"
+            }
+          }
+        ]
+      }
+    ]
   }
 }

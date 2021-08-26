@@ -97,6 +97,18 @@
     ],
     "publishRich": [],
     "cleanDraft": [],
-    "openDraft": []
+    "openDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://zhuanlan.zhihu.com/drafts"
+            }
+          }
+        ]
+      }
+    ]
   }
 }
