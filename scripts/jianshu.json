@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.13",
+    "version": "1.0.15",
     "login": [
       {
         "key": "cookieAuthPassKey",
@@ -68,7 +68,7 @@
       },
       {
         "key": "publishConfig",
-        "val": "function test() {\n        const resp = eval({\n          classify: [...document.querySelectorAll('div.ant-col>ul>li')].reduce((acc, o) => { return { ...acc, [o.innerText]: o.innerText }}, {}),\n        });\n        const groupsEnum = Object.keys(resp.classify).map((o) => o);\n        const classify = {};\n        classify.enum = groupsEnum;\n        classify.enumNames = Object.values(resp.classify);\n        classify.default = groupsEnum[0];\n        return { classify: classify }\n      }\n  \n      test()"
+        "val": "\n    async function initFrom() {\n  const resp = eval({\n    classify: [...document.querySelectorAll('div.ant-col>ul>li')].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n  });\n  const groupsEnum = Object.keys(resp.classify).map((o) => o);\n  const classify = {};\n  classify.enum = groupsEnum;\n  classify.enumNames = Object.values(resp.classify);\n  classify.default = groupsEnum[0];\n  return { classify: classify };\n}\n    initFrom()\n    "
       }
     ],
     "draft": [
@@ -142,10 +142,143 @@
         ]
       }
     ],
-    "publish": [],
+    "publish": [
+      {
+        "name": "等待",
+        "runs": [
+          {
+            "fn": "wait",
+            "props": {
+              "time": 2000
+            }
+          }
+        ]
+      },
+      {
+        "name": "查看是否已保存",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//div/p[text()[normalize-space()='已保存']]",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "点击发布",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "//a[contains(@data-action,'publicize')]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "等待保存",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//a[contains(@data-action,'privatize')]",
+              "type": "stop",
+              "timeout": 10000
+            },
+            "yes": [],
+            "no": []
+          }
+        ]
+      }
+    ],
     "draftRich": [],
     "publishRich": [],
-    "cleanDraft": [],
+    "cleanDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://www.jianshu.com/writer#/"
+            }
+          }
+        ]
+      },
+      {
+        "name": "查看是否有对应的专辑",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "li[title='{{this.body.classify}}']",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "切换专辑",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "li[title='{{this.body.classify}}']"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "查看是否有更多草稿",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": ".poOXI >i.fa-gear",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "删除草稿",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        ".poOXI >i.fa-gear",
+                        "//ul/li/span[text()[normalize-space()='删除文章']]",
+                        "//button/span[text()[normalize-space()='确 认']]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "继续循环删除",
+        "runs": [
+          {
+            "fn": "cleanDraft"
+          }
+        ]
+      }
+    ],
     "openDraft": [
       {
         "name": "跳转草稿地址",

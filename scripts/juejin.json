@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.13",
+    "version": "1.0.15",
     "login": [
       {
         "name": "登录后校验认证",
