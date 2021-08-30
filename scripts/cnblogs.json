@@ -8,7 +8,7 @@
     "processor": [
       "replaceImages"
     ],
-    "version": "1.0.15",
+    "version": "1.0.16",
     "login": [
       {
         "key": "cookieAuthPassKey",
@@ -59,7 +59,7 @@
       },
       {
         "key": "publishConfig",
-        "val": "function test() {\n        const resp = eval({classify: [...document.querySelectorAll('.category-list>div')].reduce((acc, o) => { return { ...acc, [o.innerText]: o.innerText }}, {}),})\n        const groupsEnum = Object.keys(resp.classify).map((o) => o);\n        const classify = {};\n        classify.enum = groupsEnum;\n        classify.enumNames = Object.values(resp.classify);\n        classify.default = groupsEnum[0];\n        return { classify: classify }\n      }\n  \n      test()"
+        "val": "\n      async function initFrom() {\n  const resp = eval({\n    classify: [...document.querySelectorAll('.category-list>div')].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n  });\n  const groupsEnum = Object.keys(resp.classify).map((o) => o);\n  const classify = {};\n  classify.enum = groupsEnum;\n  classify.enumNames = Object.values(resp.classify);\n  classify.default = groupsEnum[0];\n  return { classify: classify };\n}\n      initFrom()\n    "
       }
     ],
     "draft": [

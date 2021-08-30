@@ -8,7 +8,7 @@
     "processor": [
       "replaceImages"
     ],
-    "version": "1.0.15",
+    "version": "1.0.16",
     "login": [
       {
         "key": "evalAuthPassKey",

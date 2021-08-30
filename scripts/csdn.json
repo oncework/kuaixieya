@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.15",
+    "version": "1.0.16",
     "login": [
       {
         "key": "cookieAuthPassKey",
@@ -159,7 +159,81 @@
     ],
     "draftRich": [],
     "publishRich": [],
-    "cleanDraft": [],
+    "cleanDraft": [
+      {
+        "name": "跳转草稿页",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "https://mp.csdn.net/mp_blog/manage/article"
+            }
+          }
+        ]
+      },
+      {
+        "name": "切换草稿",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//ul/li/span[contains(text(),'草稿箱')]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "查看是否有更多草稿",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": ".item-info-oper>.el-dropdown",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "删除草稿",
+                "runs": [
+                  {
+                    "fn": "hover",
+                    "props": {
+                      "id": ".item-info-oper>.el-dropdown"
+                    }
+                  },
+                  {
+                    "fn": "wait",
+                    "props": {
+                      "time": 500
+                    }
+                  },
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "//ul[@x-placement='bottom-end']/li/div/a/span[contains(text(),'删除')]",
+                        "//div/button/span[contains(text(),'确定')]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "继续循环删除",
+        "runs": [
+          {
+            "fn": "cleanDraft"
+          }
+        ]
+      }
+    ],
     "openDraft": [
       {
         "name": "跳转草稿地址",
