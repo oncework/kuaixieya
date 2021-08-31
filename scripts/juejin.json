@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.16",
+    "version": "1.0.18",
     "login": [
       {
         "name": "登录后校验认证",
@@ -156,7 +156,7 @@
             }
           },
           {
-            "fn": "disappear",
+            "fn": "waitInvisible",
             "props": {
               "id": ".image-upload-progress-panel"
             }
@@ -228,6 +228,29 @@
               "ids": [
                 "//button[text()[normalize-space()='确定并发布']]"
               ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "等待发布完成",
+        "runs": [
+          {
+            "fn": "waitVisible",
+            "props": {
+              "id": "//a[contains(@class, 'title')]",
+              "timeout": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "保存发布地址",
+        "runs": [
+          {
+            "fn": "executeJavaScript",
+            "props": {
+              "js": "\n            async function getPublishUrl() {\n  let url = document.evaluate(\n    `//a[contains(@class, 'title')]`,\n    document,\n    null,\n    XPathResult.FIRST_ORDERED_NODE_TYPE,\n    null\n  ).singleNodeValue.href;\n\n  return {\n    publish: {\n      url,\n    },\n  };\n}\n            getPublishUrl()\n          "
             }
           }
         ]

@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.16",
+    "version": "1.0.18",
     "login": [
       {
         "key": "cookieAuthPassKey",
@@ -39,15 +39,35 @@
         },
         "type": {
           "title": "文章类型",
-          "default": "",
+          "default": "原创",
           "required": true,
           "disabled": false,
           "readOnly": false,
           "hidden": false,
-          "enum": [],
-          "enumNames": [],
+          "enum": [
+            "原创",
+            "转载",
+            "翻译"
+          ],
+          "enumNames": [
+            "原创",
+            "转载",
+            "翻译"
+          ],
           "type": "string",
-          "widget": "select"
+          "widget": "radio"
+        },
+        "origin_url": {
+          "title": "原文链接",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": "{{formData.type === '原创' || formData.type === '请选择'}}",
+          "props": {
+            "allowClear": false
+          },
+          "pattern": "",
+          "type": "string"
         },
         "debug": {
           "title": "是否打开渠道窗口",
@@ -69,7 +89,7 @@
       },
       {
         "key": "publishConfig",
-        "val": "\n      async function initFrom() {\n  // 打开发布文章\n  document.querySelector('.btn-publish').click();\n  // 等待打开\n  await new Promise((res) => {\n    setTimeout(() => {\n      res();\n    }, 500);\n  });\n  // 获取配置\n  const resp = eval({\n    type: [...document.querySelectorAll(`.textfield>option`)].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n  });\n  const groupsEnum = Object.keys(resp.type).map((o) => o);\n  const type = {};\n  type.enum = groupsEnum;\n  type.enumNames = Object.values(resp.type);\n  type.default = groupsEnum[0];\n  return { type: type };\n}\n      initFrom()\n    "
+        "val": "\n      async function initFrom() {\n  return {};\n}\n      initFrom()\n    "
       }
     ],
     "draft": [
@@ -105,22 +125,6 @@
         ]
       },
       {
-        "name": "保存草稿",
-        "only": true,
-        "runs": [
-          {
-            "fn": "clicks",
-            "props": {
-              "ids": [
-                "//button[text()[normalize-space()='保存草稿']]"
-              ]
-            }
-          }
-        ]
-      }
-    ],
-    "publish": [
-      {
         "name": "等待初始化",
         "runs": [
           {
@@ -150,8 +154,91 @@
           {
             "fn": "select",
             "props": {
-              "id": ".textfield",
+              "id": "select.textfield",
               "value": "{{this.body.type}}"
+            }
+          }
+        ]
+      },
+      {
+        "name": "勾选授权",
+        "when": "'{{this.body.type}}' !== '原创'",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//label[contains(@for, 'chkAuthorized')]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "请填写原文链接",
+        "when": "'{{this.body.type}}' !== '原创'",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "input[placeholder=\"请填写原文链接\"]",
+                  "val": "{{this.body.origin_url}}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "保存草稿",
+        "only": true,
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()[normalize-space()='保存为草稿']]"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "name": "点击发布按钮",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//div[contains(@class, 'modal__button-bar')]/button[text()[normalize-space()='发布文章']]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "等待发布完成",
+        "runs": [
+          {
+            "fn": "waitVisible",
+            "props": {
+              "id": "//a[contains(@class, 'toarticle c-blue')]",
+              "timeout": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "保存发布地址",
+        "runs": [
+          {
+            "fn": "executeJavaScript",
+            "props": {
+              "js": "\n            async function getPublishUrl() {\n  let url = document.evaluate(\n    `//a[contains(@class, 'toarticle c-blue')]`,\n    document,\n    null,\n    XPathResult.FIRST_ORDERED_NODE_TYPE,\n    null\n  ).singleNodeValue.href;\n\n  return {\n    publish: {\n      url,\n    },\n  };\n}\n            getPublishUrl()\n          "
             }
           }
         ]

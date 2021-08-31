@@ -8,7 +8,7 @@
     "processor": [
       "replaceImages"
     ],
-    "version": "1.0.16",
+    "version": "1.0.18",
     "login": [
       {
         "key": "evalAuthPassKey",
@@ -195,6 +195,31 @@
         ]
       },
       {
+        "name": "打开添加标签面板",
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()=\"+ 添加标签\"]"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "添加标签",
+        "runs": [
+          {
+            "fn": "clicksByValues",
+            "props": {
+              "match": "//div[contains(@class, 'tab-content')]/div/a[text()[normalize-space()='$1']]",
+              "ids": "{{this.body.tags}}"
+            }
+          }
+        ]
+      },
+      {
         "name": "打开发布文章",
         "runs": [
           {
@@ -325,6 +350,29 @@
               "ids": [
                 "//button[text()[normalize-space()='确认发布']]"
               ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "等待发布完成",
+        "runs": [
+          {
+            "fn": "waitVisible",
+            "props": {
+              "id": "//button[contains(@aria-label, \"点赞\")]",
+              "timeout": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "保存发布地址",
+        "runs": [
+          {
+            "fn": "executeJavaScript",
+            "props": {
+              "js": "\n            async function getPublishUrl() {\n  return {\n    publish: {\n      url: window.location.href,\n    },\n  };\n}\n            getPublishUrl()\n          "
             }
           }
         ]

@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.16",
+    "version": "1.0.18",
     "login": [
       {
         "key": "cookieAuthPassKey",
@@ -155,6 +155,29 @@
               }
             ],
             "no": []
+          }
+        ]
+      },
+      {
+        "name": "等待发布完成",
+        "runs": [
+          {
+            "fn": "waitVisible",
+            "props": {
+              "id": "//button[contains(@aria-label, \"赞同\")]",
+              "timeout": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "保存发布地址",
+        "runs": [
+          {
+            "fn": "executeJavaScript",
+            "props": {
+              "js": "\n            async function getPublishUrl() {\n  return {\n    publish: {\n      url: window.location.href,\n    },\n  };\n}\n            getPublishUrl()\n          "
+            }
           }
         ]
       }

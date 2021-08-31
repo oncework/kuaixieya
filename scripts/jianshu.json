@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.0.16",
+    "version": "1.0.18",
     "login": [
       {
         "key": "cookieAuthPassKey",
@@ -194,6 +194,17 @@
             },
             "yes": [],
             "no": []
+          }
+        ]
+      },
+      {
+        "name": "保存发布地址",
+        "runs": [
+          {
+            "fn": "executeJavaScript",
+            "props": {
+              "js": "\n            async function getPublishUrl() {\n  let url = document.evaluate(\n    `//a[contains(@class, '_2ajaT')]`,\n    document,\n    null,\n    XPathResult.FIRST_ORDERED_NODE_TYPE,\n    null\n  ).singleNodeValue.href;\n\n  return {\n    publish: {\n      url,\n    },\n  };\n}\n            getPublishUrl()\n          "
+            }
           }
         ]
       }
