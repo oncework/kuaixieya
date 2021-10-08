@@ -1,0 +1,239 @@
+{
+  "key": "typecho",
+  "name": "Typecho",
+  "type": "开发者",
+  "url": "{{this.customProps.url}}/admin/login.php",
+  "customProps": {
+    "url": ""
+  },
+  "logoUrl": "https://cdn.jsdelivr.net/gh/xudaolong/kuaixieya-oss/2021-10-8/1633683727516-image.png",
+  "puppeteerScripts": {
+    "processor": [],
+    "version": "1.2.3",
+    "login": [
+      {
+        "key": "cookieAuthPassKey",
+        "val": "__typecho_authCode"
+      }
+    ],
+    "configSchema": {
+      "type": "object",
+      "displayType": "row",
+      "showDescIcon": true,
+      "column": 1,
+      "properties": {
+        "mode": {
+          "title": "文章编辑器",
+          "default": "md",
+          "required": true,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "enum": [
+            "md",
+            "rich"
+          ],
+          "enumNames": [
+            "Markdown",
+            "富文本"
+          ],
+          "type": "string",
+          "widget": "select"
+        },
+        "debug": {
+          "title": "是否打开渠道窗口",
+          "description": "勾选则显示发布流程",
+          "default": false,
+          "required": false,
+          "disabled": false,
+          "readOnly": false,
+          "hidden": false,
+          "type": "boolean",
+          "widget": "checkbox"
+        }
+      }
+    },
+    "configProcessing": [
+      {
+        "key": "publishUrl",
+        "val": "http://localhost:90/admin/write-post.php"
+      },
+      {
+        "key": "publishConfig",
+        "val": "\n    async function initFrom() {\n  const resp = eval({\n    classify: [...document.querySelectorAll('div.ant-col>ul>li')].reduce((acc, o) => {\n      return { ...acc, [o.innerText]: o.innerText };\n    }, {}),\n  });\n  const groupsEnum = Object.keys(resp.classify).map((o) => o);\n  const classify = {};\n  classify.enum = groupsEnum;\n  classify.enumNames = Object.values(resp.classify);\n  classify.default = groupsEnum[0];\n  return { classify: classify };\n}\n    initFrom()\n    "
+      }
+    ],
+    "draft": [
+      {
+        "name": "跳转页面",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "{{this.customProps.url}}/admin/write-post.php"
+            }
+          }
+        ]
+      },
+      {
+        "name": "发布内容",
+        "runs": [
+          {
+            "fn": "pastes",
+            "props": {
+              "groups": [
+                {
+                  "key": "input[id='title'][value]",
+                  "val": "{{this.body.title}}"
+                },
+                {
+                  "key": "textarea[id='text']",
+                  "val": "{{this.body.content}}"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "保存草稿",
+        "only": true,
+        "runs": [
+          {
+            "fn": "clicks",
+            "props": {
+              "ids": [
+                "//button[text()[normalize-space()='保存草稿']]"
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "publish": [
+      {
+        "name": "查看是否已保存",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//input[contains(@id, \"date\")][@value]",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "点击发布",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "//button[contains(@id, \"btn-submit\")]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "等待保存",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//a[text()[normalize-space()='新增']]",
+              "type": "stop",
+              "timeout": 10000
+            },
+            "yes": [],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "保存发布地址",
+        "runs": [
+          {
+            "fn": "executeJavaScript",
+            "props": {
+              "js": "\n            async function getPublishUrl() {\n  let url = document.evaluate(\n    `//tr[contains(@id, 'post-')]/td[3]/a[3]`,\n    document,\n    null,\n    XPathResult.FIRST_ORDERED_NODE_TYPE,\n    null\n  ).singleNodeValue.href;\n\n  return {\n    publish: {\n      url,\n    },\n  };\n}\n            getPublishUrl()\n          "
+            }
+          }
+        ]
+      }
+    ],
+    "draftRich": [],
+    "publishRich": [],
+    "cleanDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "{{this.customProps.url}}/admin/manage-posts.php?status=draft"
+            }
+          }
+        ]
+      },
+      {
+        "name": "是否有草稿",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//tr[contains(@id, 'post_draft')]",
+              "type": "stop"
+            },
+            "yes": [
+              {
+                "name": "全部删除",
+                "runs": [
+                  {
+                    "fn": "onDialogAccept"
+                  },
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "input[class='typecho-table-select-all']",
+                        "//button[text()[normalize-space()='选中项']]",
+                        "//a[text()[normalize-space()='删除']]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "继续循环删除",
+        "runs": [
+          {
+            "fn": "cleanDraft"
+          }
+        ]
+      }
+    ],
+    "openDraft": [
+      {
+        "name": "跳转草稿地址",
+        "runs": [
+          {
+            "fn": "gotoUrl",
+            "props": {
+              "url": "{{this.customProps.url}}/admin/manage-posts.php?status=draft"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
