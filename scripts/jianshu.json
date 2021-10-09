@@ -6,7 +6,7 @@
   "logoUrl": "",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.2.3",
+    "version": "1.2.5",
     "login": [
       {
         "key": "cookieAuthPassKey",
