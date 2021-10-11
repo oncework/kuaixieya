@@ -1,16 +1,16 @@
 {
-  "key": "csdn",
-  "name": "CSDN",
-  "type": "开发者",
-  "url": "https://blog.csdn.net/",
-  "logoUrl": "",
+  "key": "ssapi",
+  "name": "少数派",
+  "type": "通用类",
+  "url": "https://sspai.com/my/post/draft",
+  "logoUrl": "https://cdn.jsdelivr.net/gh/xudaolong/kuaixieya-oss/2021-10-11/1633958405388-image.png",
   "puppeteerScripts": {
     "processor": [],
     "version": "1.2.6",
     "login": [
       {
         "key": "cookieAuthPassKey",
-        "val": "UserToken"
+        "val": "sspai_jwt_token"
       }
     ],
     "configSchema": {
@@ -37,37 +37,21 @@
           "type": "string",
           "widget": "select"
         },
-        "type": {
-          "title": "文章类型",
-          "default": "原创",
-          "required": true,
+        "coverUrl": {
+          "title": "上传封面大图",
+          "type": "string",
+          "widget": "LocalPicPreview"
+        },
+        "allowComment": {
+          "title": "允许评论",
+          "description": "是否允许评论",
+          "default": true,
+          "required": false,
           "disabled": false,
           "readOnly": false,
           "hidden": false,
-          "enum": [
-            "原创",
-            "转载",
-            "翻译"
-          ],
-          "enumNames": [
-            "原创",
-            "转载",
-            "翻译"
-          ],
-          "type": "string",
-          "widget": "radio"
-        },
-        "origin_url": {
-          "title": "原文链接",
-          "required": true,
-          "disabled": false,
-          "readOnly": false,
-          "hidden": "{{formData.type === '原创' || formData.type === '请选择'}}",
-          "props": {
-            "allowClear": false
-          },
-          "pattern": "",
-          "type": "string"
+          "type": "boolean",
+          "widget": "checkbox"
         },
         "debug": {
           "title": "是否打开渠道窗口",
@@ -85,11 +69,11 @@
     "configProcessing": [
       {
         "key": "publishUrl",
-        "val": "https://editor.csdn.net/md/?not_checkout=1"
+        "val": "https://sspai.com/write"
       },
       {
         "key": "publishConfig",
-        "val": "\n      async function initFrom() {\n  return {};\n}\n      initFrom()\n    "
+        "val": "\n    async function initFrom() {\n  return {};\n}\n    initFrom()\n    "
       }
     ],
     "draft": [
@@ -99,7 +83,22 @@
           {
             "fn": "gotoUrl",
             "props": {
-              "url": "https://editor.csdn.net/md/?not_checkout=1"
+              "url": "https://sspai.com/write"
+            }
+          }
+        ]
+      },
+      {
+        "name": "上传封面",
+        "when": "Boolean('{{this.body.coverUrl}}')",
+        "runs": [
+          {
+            "fn": "uploadPic",
+            "props": {
+              "selectId": ".upload-image-container > div > input[type=file]",
+              "url": "{{this.body.coverUrl}}",
+              "picId": ".upload-preview>img[src^=\"https\"]",
+              "confirmId": "//button[contains(@class, 'colorRed')]/span[text()[normalize-space()='裁切并使用']]"
             }
           }
         ]
@@ -112,11 +111,11 @@
             "props": {
               "groups": [
                 {
-                  "key": "//input[contains(@class,'article-bar__title article-bar__title--input')]",
+                  "key": "textarea[placeholder='请输入标题...']",
                   "val": "{{this.body.title}}"
                 },
                 {
-                  "key": ".editor__inner",
+                  "key": "div[contenteditable]",
                   "val": "{{this.body.content}}"
                 }
               ]
@@ -130,62 +129,48 @@
           {
             "fn": "wait",
             "props": {
-              "time": 1000
+              "time": 500
             }
           }
         ]
       },
       {
-        "name": "打开发布界面",
+        "name": "是否需要立即转换",
+        "runs": [
+          {
+            "fn": "has",
+            "props": {
+              "id": "//span[text()[normalize-space()='立即转换']]",
+              "type": ""
+            },
+            "yes": [
+              {
+                "name": "立即转换",
+                "runs": [
+                  {
+                    "fn": "clicks",
+                    "props": {
+                      "ids": [
+                        "//span[text()[normalize-space()='立即转换']]"
+                      ]
+                    }
+                  }
+                ]
+              }
+            ],
+            "no": []
+          }
+        ]
+      },
+      {
+        "name": "勾选不允许评论",
+        "when": "!Boolean('{{this.body.allowComment}}')",
         "runs": [
           {
             "fn": "clicks",
             "props": {
               "ids": [
-                "//button[text()[normalize-space()='发布文章']]"
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "name": "选择文章类型",
-        "runs": [
-          {
-            "fn": "select",
-            "props": {
-              "id": "select.textfield",
-              "value": "{{this.body.type}}"
-            }
-          }
-        ]
-      },
-      {
-        "name": "勾选授权",
-        "when": "'{{this.body.type}}' !== '原创'",
-        "runs": [
-          {
-            "fn": "clicks",
-            "props": {
-              "ids": [
-                "//label[contains(@for, 'chkAuthorized')]"
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "name": "请填写原文链接",
-        "when": "'{{this.body.type}}' !== '原创'",
-        "runs": [
-          {
-            "fn": "pastes",
-            "props": {
-              "groups": [
-                {
-                  "key": "input[placeholder=\"请填写原文链接\"]",
-                  "val": "{{this.body.origin_url}}"
-                }
+                "//div[@class='attr-form']/div[contains(@aria-checked, 'true')]"
               ]
             }
           }
@@ -199,7 +184,7 @@
             "fn": "clicks",
             "props": {
               "ids": [
-                "//button[text()[normalize-space()='保存为草稿']]"
+                "//span[text()[normalize-space()='保存']]"
               ]
             }
           }
@@ -208,13 +193,14 @@
     ],
     "publish": [
       {
-        "name": "点击发布按钮",
+        "name": "进行保存",
         "runs": [
           {
             "fn": "clicks",
             "props": {
               "ids": [
-                "//div[contains(@class, 'modal__button-bar')]/button[text()[normalize-space()='发布文章']]"
+                "//span[text()[normalize-space()='操作']]",
+                "//button[text()[normalize-space()='发布']]"
               ]
             }
           }
@@ -226,7 +212,7 @@
           {
             "fn": "waitVisible",
             "props": {
-              "id": "//a[contains(@class, 'toarticle c-blue')]",
+              "id": "#article-title",
               "timeout": 10
             }
           }
@@ -238,7 +224,7 @@
           {
             "fn": "executeJavaScript",
             "props": {
-              "js": "\n            async function getPublishUrl() {\n  let url = document.evaluate(\n    `//a[contains(@class, 'toarticle c-blue')]`,\n    document,\n    null,\n    XPathResult.FIRST_ORDERED_NODE_TYPE,\n    null\n  ).singleNodeValue.href;\n\n  return {\n    publish: {\n      url,\n    },\n  };\n}\n            getPublishUrl()\n          "
+              "js": "\n            async function getPublishUrl() {\n  return {\n    publish: {\n      url: window.location.href,\n    },\n  };\n}\n            getPublishUrl()\n          "
             }
           }
         ]
@@ -248,60 +234,41 @@
     "publishRich": [],
     "cleanDraft": [
       {
-        "name": "跳转草稿页",
+        "name": "跳转草稿地址",
         "runs": [
           {
             "fn": "gotoUrl",
             "props": {
-              "url": "https://mp.csdn.net/mp_blog/manage/article"
+              "url": "https://sspai.com/my/post/draft"
             }
           }
         ]
       },
       {
-        "name": "切换草稿",
-        "runs": [
-          {
-            "fn": "clicks",
-            "props": {
-              "ids": [
-                "//ul/li/span[contains(text(),'草稿箱')]"
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "name": "查看是否有更多草稿",
+        "name": "是否有草稿",
         "runs": [
           {
             "fn": "has",
             "props": {
-              "id": ".item-info-oper>.el-dropdown",
+              "id": "//span[contains(@class, 'post-action-edit')]",
               "type": "stop"
             },
             "yes": [
               {
-                "name": "删除草稿",
+                "name": "逐个删除",
                 "runs": [
                   {
                     "fn": "hover",
                     "props": {
-                      "id": ".item-info-oper>.el-dropdown"
-                    }
-                  },
-                  {
-                    "fn": "wait",
-                    "props": {
-                      "time": 500
+                      "id": ".iconfont-more"
                     }
                   },
                   {
                     "fn": "clicks",
                     "props": {
                       "ids": [
-                        "//ul[@x-placement='bottom-end']/li/div/a/span[contains(text(),'删除')]",
-                        "//div/button/span[contains(text(),'确定')]"
+                        "//span[contains(@class, 'danger')][text()[normalize-space()='删除']]",
+                        "//button[contains(@class, 'colorRed')]/span[text()[normalize-space()='确定']]"
                       ]
                     }
                   }
@@ -328,7 +295,7 @@
           {
             "fn": "gotoUrl",
             "props": {
-              "url": "https://mp.csdn.net/mp_blog/manage/article"
+              "url": "https://sspai.com/my/post/draft"
             }
           }
         ]

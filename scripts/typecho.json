@@ -9,7 +9,7 @@
   "logoUrl": "https://cdn.jsdelivr.net/gh/xudaolong/kuaixieya-oss/2021-10-8/1633683727516-image.png",
   "puppeteerScripts": {
     "processor": [],
-    "version": "1.2.5",
+    "version": "1.2.6",
     "login": [
       {
         "key": "cookieAuthPassKey",
